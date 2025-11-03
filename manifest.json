@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Improved Dreaming",
-  "version": "1.4",
+  "version": "1.5",
   "description": "Enhance your Dreaming experience! Originally made for DS but can be used on any Dreaming platform. \n This extension features: \n - Calculates the total runtime for the 'My list' carousel \n - Enables a full-width, widescreen video player",
   "content_scripts": [
     {

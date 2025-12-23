@@ -1,7 +1,8 @@
 (function() {
   // --- Configuration ---
   const BUTTON_ID = 'ds-fullscreen-toggle-btn';
-  const BUTTON_CONTAINER_SELECTOR = '.ds-video-section__actions';
+  // Insert in the Shaka player controls panel so the button sits with other controls
+  const BUTTON_CONTAINER_SELECTOR = '.shaka-controls-button-panel';
   const EMBED_SELECTOR = '.ds-video-section__embed';
 
   // --- State ---
@@ -77,70 +78,35 @@
     if (document.getElementById(BUTTON_ID)) return; // already present
 
     const btn = document.createElement('button');
+    btn.type = 'button';
     btn.id = BUTTON_ID;
-    btn.className = 'btn ds-button ds-button--muted';
+    // Use Shaka control classes so it appears inline with other player buttons
+    btn.className = 'material-icons-round shaka-tooltip shaka-no-propagation';
     btn.setAttribute('aria-label', 'In-Window Fullscreen (ESC to exit)');
     btn.title = 'In-Window Fullscreen (ESC to exit)';
-
-    // Create a 14x14 SVG fullscreen icon and append it to the button
-    try {
-      const svgNS = 'http://www.w3.org/2000/svg';
-      const svg = document.createElementNS(svgNS, 'svg');
-      svg.setAttribute('width', '14');
-      svg.setAttribute('height', '14');
-      // Use a 14x14 viewBox and draw bold corner strokes for a fullscreen icon
-      svg.setAttribute('viewBox', '0 0 14 14');
-      svg.setAttribute('aria-hidden', 'true');
-
-      // Create four corner paths with bold strokes (stroke uses currentColor)
-      const makeCorner = (d) => {
-        const p = document.createElementNS(svgNS, 'path');
-        p.setAttribute('d', d);
-        p.setAttribute('fill', 'none');
-        p.setAttribute('stroke', 'currentColor');
-        p.setAttribute('stroke-width', '2.4');
-        p.setAttribute('stroke-linecap', 'round');
-        p.setAttribute('stroke-linejoin', 'round');
-        return p;
-      };
-
-      // Top-left corner
-      svg.appendChild(makeCorner('M4 1 L1 1 L1 4'));
-      // Top-right corner
-      svg.appendChild(makeCorner('M10 1 L13 1 L13 4'));
-      // Bottom-left corner
-      svg.appendChild(makeCorner('M1 10 L1 13 L4 13'));
-      // Bottom-right corner
-      svg.appendChild(makeCorner('M10 13 L13 13 L13 10'));
-
-      btn.appendChild(svg);
-    } catch (err) {
-      // Fallback: use a simple glyph if SVG creation fails
-      btn.textContent = '⤢';
-    }
+    btn.textContent = 'screenshot_monitor';
 
     btn.addEventListener('click', () => {
-      // Enter fullscreen (do not auto-exit on click; user should press ESC)
+      // Enter in-window fullscreen or exit if already active
       if (!isFullscreen) {
         enterFullscreen();
       } else {
-        // Allow clicking the button to also exit as a convenience
         exitFullscreen();
       }
     });
 
     // Try to insert to the right of the widescreen button if it exists
+    // Prefer inserting next to our widescreen button, otherwise near the native fullscreen
     const wideBtn = document.getElementById('ds-widescreen-toggle-btn');
     if (wideBtn && wideBtn.parentNode === container) {
-      // Insert after wideBtn
-      if (wideBtn.nextSibling) {
-        container.insertBefore(btn, wideBtn.nextSibling);
+      container.insertBefore(btn, wideBtn.nextSibling || null);
+    } else {
+      const shakaFs = container.querySelector('.shaka-fullscreen-button');
+      if (shakaFs && shakaFs.parentNode === container) {
+        container.insertBefore(btn, shakaFs.nextSibling || null);
       } else {
         container.appendChild(btn);
       }
-    } else {
-      // Fallback: append at the end
-      container.appendChild(btn);
     }
   }
 
